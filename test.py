@@ -1,136 +1,114 @@
 import requests
 import time
-from collections import defaultdict
 import pandas as pd
 
 tools = [
     {
-                "type": "function",
-                "function": {
-                    "name": "gameTopic",
-                    "description": "判断属于游戏类的问题，使用此function。比如新版本更新了什么内容，游戏模式怎么玩，武器枪支性能评测，角色皮肤相关问题，新手如何上人口，剧场版怎么玩，荣都地图介绍一下等等。",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-
-                        }
-                    }
-                }
-            },
+        "type": "function",
+        "function": {
+            "name": "gameTopic",
+            "description": "query涉及电子游戏的游戏玩法、攻略、角色设定、道具、装备、地图、关卡、电竞赛事等相关内容",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
     {
-                "type": "function",
-                "function": {
-                    "name": "otherTopic",
-                    "description": "判断非游戏类的问题，使用此function。比如锅包肉怎么做，荣耀手机现在卖多少钱，明天冷不冷等等。",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-
-                        }
-                    }
-                }
-            },
+        "type": "function",
+        "function": {
+            "name": "financeTopic",
+            "description": "query涉及金融、投资、理财、经济等相关内容，比如股票、基金、保险、贷款等方面的问题",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "lawTopic",
+            "description": "query涉及法律、法规、合规、知识产权、合同、诉讼等相关内容",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "telecomTopic",
+            "description": "query涉及通信、网络、运营商、资费、套餐、信号等相关内容",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "medicineTopic",
+            "description": "query涉及医学、药学、疾病、症状、治疗、健康等相关内容",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "insuranceTopic",
+            "description": "query涉及保险、理赔、投保、保单、保险产品等相关内容",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "otherTopic",
+            "description": "query不属于gameTopic、financeTopic、lawTopic、telecomTopic、medicineTopic、insuranceTopic中任一分类类别",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
 ]
-
-
-
-def gameTopic():
-
-    return """ """
-
-def otherTopic():
-    
-    return """ """
 
 
 prompt = """
 # [任务说明]
-你是一个熟悉各类游戏的专家，需要对输入的query进行意图判断，决定调用tools中的哪个函数。
+你是一个专业的通用智能体助手，能够识别query属于如下的哪一类别：
 
----
-
-## 1：游戏相关问题定义
-
-### 1.1 常见游戏列表
-王者荣耀，和平精英，金铲铲之战，火影忍者，暗区突围，三角洲行动，穿越火线-枪战王者…………
-
-### 1.2 用户游戏问题分类
-- 新赛季更新内容、改动概要  
-- 某个赛季的开始/结束时间、版本内容介绍  
-- 上分攻略、宝典，英雄、阵容、吃鸡阵容推荐  
-- 角色新老皮肤相关咨询  
-- 游戏角色怎么玩  
-- 英雄改动  
-- 联动IP  
-- 新/老地图、不同游戏模型玩法  
-- 武器枪支评测、实战打法  
-- 天选福星版本玩法  
-- 新手攻略、教程（如人口阶段、前期发育、打钱）  
-- 新英雄、新忍者、新枪支爆料  
-- 版本主题活动奖励、玩法  
-- 礼包领取、活动参与、相关攻略
-
----
-
-## 2：名词提取与判断规则
-
-### 2.1 名词提取
-- 判断query中是否包含名词或名词短语  
-- 提取所有名词
-
-### 2.2 游戏相关名词判断
-- 如果提取的名词中至少有一个属于模块1中的“常见游戏”或“用户游戏问题分类”，则判定为游戏相关；
-- “常见游戏”或“用户游戏问题分类”中没显示的不代表不属于游戏分类，需要结合名词具体分析；
-- 有时提取的名词属于某个游戏中出现的，这也判定为游戏相关；
-
-### 2.3 特殊名词示例
-- “Magic7”（荣耀手机型号）  
-- “新干员”（三角洲行动角色）  
-- “海岛图”（和平精英地图） 
-- “苏尔南冲突”（和平精英一种模式） 
-- “王者之击”（穿越火线武器）
-…………
-
----
-
-## 3：特殊情况处理
-
-### 3.1 句式判断
-- 出现“在某个[常见游戏]中”的句式时，若后半句内容与游戏无关，判定为非游戏意图
-
-### 3.2 敏感词判断
-- 名词中出现敏感词，则既不属于游戏意图也不属于非游戏意图
-
----
-
-## 4：进一步意图判断
-
-- “你是谁”及相关问题，判定为游戏问题  
-- 其余问题判定为非游戏问题
-
----
-
-## 5：函数调用规则
-
-- 游戏类query调用tools中的`gameTopic`函数；
-- 非游戏类query调用tools中的`othertTopic`函数；
-- 对没有调用函数的query再进行一次模型2-4的判断，如果第二次没有调用函数，那就既不属于游戏意图也不属于非游戏意图，无需调用函数
+## 一、类别定义：
+1. gameTopic：如果query涉及电子游戏的游戏玩法、攻略、角色设定、道具、装备、地图、关卡、电竞赛事等相关内容，则归为“gameTopic”；
+2. financeTopic：如果query涉及金融、投资、理财、经济等相关内容，比如股票、基金、保险、贷款等方面的问题，则属于“financeTopic”;
+3. lawTopic：如果query涉及法律、法规、合规、知识产权、合同、诉讼等相关内容，则属于“lawTopic”；
+4. telecomTopic：如果query涉及通信、网络、运营商、资费、套餐、信号等相关内容，则属于“telecomTopic”；
+5. medicineTopic：如果query涉及医学、药学、疾病、症状、治疗、健康等相关内容，则属于“medicineTopic”；
+6. insuranceTopic：如果query涉及保险、理赔、投保、保单、保险产品等相关内容，则属于“insuranceTopic”；
+7. otherTopic：如果query不属于gameTopic、financeTopic、lawTopic、telecomTopic、medicineTopic、insuranceTopic中任一分类类别，则属于“otherTopic”。
 
 
----
+## 二、每个query根据分类类别的定义选择一个合适的类别并输出类别名称。
+1. 从类别 1 开始，依次检查 query 是否符合该类别定义；
+2. 一旦匹配成功，立即停止判断并输出该类别名称；
+3. 如果全部类别都不匹配，则归类为“otherTopic”；
 
-## 6：回复要求
-
-- 不无中生有  
-- 不编造  
-- 不进行追问
-
+## 三、回复要求：不无中生有、不编造。
 """
 
 
 def get_response(messages):
     api_key = " "
-    url = "http://10.71.124.177:8901/v1/chat/completions"
+    url = "http://10.71.125.108:18901/v1/chat/completions"
     headers = {"Content-Type": "application/json", 
                "Authorization": f"Bearer {api_key}"}
     body = {"model": "Qwen3-32B", 
@@ -148,10 +126,6 @@ def get_response(messages):
     response = requests.post(url, headers=headers, json=body, proxies={})
     return response.json()
 
-
-call_counts = defaultdict(int)        # function调用次数
-correct_call_counts = defaultdict(int) # function正确调用次数
-should_call_counts = defaultdict(int)  # function应该调用次数
 
 def call_with_messages(user_query, prompt):
     start = time.time()
@@ -174,41 +148,47 @@ def call_with_messages(user_query, prompt):
 
     if assistant_output["tool_calls"][0]["function"]["name"] == "gameTopic":
         tool_info = {"name": "gameTopic", "role": "tool"}
-        tool_info["content"] = gameTopic()
+
     elif assistant_output["tool_calls"][0]["function"]["name"] == "otherTopic":
         tool_info = {"name": "otherTopic", "role": "tool"}
-        tool_info["content"] = otherTopic()
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "生活百科":
+        tool_info = {"name": "生活百科", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "健康常识":
+        tool_info = {"name": "健康常识", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "地点查询":
+        tool_info = {"name": "地点查询", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "影音小说":
+        tool_info = {"name": "影音小说", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "天气查询":
+        tool_info = {"name": "天气查询", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "菜谱推荐":
+        tool_info = {"name": "菜谱推荐", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "金融理财":
+        tool_info = {"name": "金融理财", "role": "tool"}
+
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "产品评价":
+        tool_info = {"name": "产品评价", "role": "tool"}
+    
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "交通服务":
+        tool_info = {"name": "交通服务", "role": "tool"}
+       
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "新闻阅读":
+        tool_info = {"name": "新闻阅读", "role": "tool"}
+        
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "语法词汇":
+        tool_info = {"name": "语法词汇", "role": "tool"}
+     
 
     tool_info["duration"] = duration
 
-    
-    called_function = None
-    if "tool_calls" in assistant_output:
-        called_function = assistant_output["tool_calls"][0]["function"]["name"]
-        call_counts[called_function] += 1
-
-
-    expected_function = ground_truth_map.get(user_query, None)
-    if expected_function is not None:
-        should_call_counts[expected_function] += 1
-
-    if called_function == expected_function and called_function is not None:
-        correct_call_counts[called_function] += 1
-
-    return called_function, tool_info["duration"]
-
-def print_metrics():
-    total_calls = sum(call_counts.values())
-    print("Function调用比例:")
-    for func, count in call_counts.items():
-        ratio = count / total_calls if total_calls > 0 else 0
-        print(f"{func}: {ratio:.2%} ({count}次调用)")
-
-    print("\nFunction准确率和召回率:")
-    for func in should_call_counts.keys():
-        precision = correct_call_counts[func] / call_counts[func] if call_counts[func] > 0 else 0
-        recall = correct_call_counts[func] / should_call_counts[func] if should_call_counts[func] > 0 else 0
-        print(f"{func} - 准确率: {precision:.2%}, 召回率: {recall:.2%}")
+    return tool_info["name"], tool_info["duration"]
 
 
 output_filename = "d:/项目文件/test-result-withoutthink.txt"
@@ -217,22 +197,29 @@ def batch_process(user_queries, output_filename, prompt):
     with open(output_filename, "w", encoding="utf-8") as fout:
         for user_query in user_queries:
             result = call_with_messages(user_query, prompt)
-            if isinstance(result, tuple) and len(result) == 2:
-                name, d = result
-                # fout.write(f"Tool: {name}, durations: {d:.2f}\n\n")
-                fout.write(name + "\n")
+            if isinstance(result, tuple) and len(result) >= 1:
+                name = result[0]
             else:
-                fout.write(f"Response: {result}\n")
+                name = str(result)
+            
+            # 如果 name 不是字符串，转成字符串
+            if not isinstance(name, str):
+                name = str(name)
 
+            # 去掉首尾引号（如果有）
+            if name.startswith('"') and name.endswith('"'):
+                name = name[1:-1]
+            if name.startswith("'") and name.endswith("'"):
+                name = name[1:-1]
+
+            fout.write(name + "\n")
 
 
 if __name__ == "__main__":
     
-    df = pd.read_excel('d:/项目文件/test_2.xlsx', header=None, names=['query', 'ground_truth'])
+    df = pd.read_excel('d:/项目文件/11111.xlsx', header=None, names=['query'])
 
     user_queries = df['query'].tolist()
 
-    ground_truth_map = dict(zip(df['query'], df['ground_truth']))
-
     batch_process(user_queries, output_filename, prompt)
-    print_metrics()
+    
